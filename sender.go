@@ -27,7 +27,7 @@ func (s Sender) Send(phone, text string) error {
 		phone = strings.TrimPrefix(phone, "+")
 	}
 
-	for n := 1; n <= maxCodeLength; n++ {
+	for n := maxCodeLength; n >= 1; n-- {
 		code := phone[:n]
 
 		ds, ok := s.Directs[code]
