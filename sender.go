@@ -8,6 +8,9 @@ import (
 var ErrPhoneFormat = errors.New("Phone number in incorrect format")
 var ErrNoDefaultSender = errors.New("Default sender not set")
 
+const defaultSender = "999"
+const maxCodeLength = 3
+
 // Sender ...
 type Sender struct {
 	Directs map[string]DirectSender
@@ -24,14 +27,18 @@ func (s Sender) Send(phone, text string) error {
 		phone = strings.TrimPrefix(phone, "+")
 	}
 
-	code := phone[:3]
+	for n := 1; n <= maxCodeLength; n++ {
+		code := phone[:n]
 
-	ds, ok := s.Directs[code]
-	if !ok {
-		ds, ok = s.Directs["999"]
-		if !ok {
-			return ErrNoDefaultSender
+		ds, ok := s.Directs[code]
+		if ok {
+			return ds.Send(phone, text)
 		}
+	}
+
+	ds, ok := s.Directs[defaultSender]
+	if !ok {
+		return ErrNoDefaultSender
 	}
 
 	return ds.Send(phone, text)
